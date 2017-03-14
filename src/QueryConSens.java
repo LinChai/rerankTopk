@@ -49,7 +49,7 @@ public class QueryConSens{
         this.k1 = k1;
         this.k3 = k3;
         this.b = b;
-        this.delta = 5;
+        this.delta = 0.3;
     } 
     public void genRelevanceScore() {
         String line = null;
@@ -147,7 +147,10 @@ public class QueryConSens{
                             pair_tf_query = doc_pair_info.get(m).pair_tf_query;
                         }
                         sum_AR += doc_pair_info.get(m).ARscore;
+                        if(doc_pair_info.get(m).coOccur == 0)
+                            continue;
                         n_pair += doc_pair_info.get(m).pair_tf_doc / doc_pair_info.get(m).coOccur;
+                        //System.out.println("n_pair:"+n_pair+"pair_tf_doc:"+ doc_pair_info.get(m).pair_tf_doc+" coOccur: "+ doc_pair_info.get(m).coOccur);
                     }
                     //System.out.println(docContext.id+ ": "+key + ": " + pair_tf_doc);
                     double pair_weight_prox = genWeightTermPair(K, pair_tf_doc, pair_tf_query, n_pair, N);
@@ -158,14 +161,16 @@ public class QueryConSens{
                 }
             }
             //double new_score = (1-delta) * sum_term_weight + delta * sum_AR_prox;
-            double new_score = /*(1-delta) **/ rr.scores.get(k).score + delta * sum_AR_prox;
+            //System.out.println(sum_AR_prox);
+            double new_score = (1-delta) * rr.scores.get(k).score + delta * sum_AR_prox;
             
             rr.scores.set(k, new DocScore(docContext.id, new_score));
         }
         rr.sort();
         rerank.put(Integer.toString(qId), rr);
         for(int i = 0; i < N; i++)
-            System.out.println(qId+ " Q0 " + rr.scores.get(i).docno+ " "+ i + " " + String.format("%.2f", rr.scores.get(i).score) + " bm25");
+            System.out.println(qId+ " Q0 " + rr.scores.get(i).docno+ " "+ i + " " + /*String.format("%.2f",*/ rr.scores.get(i).score/*)*/ + " bm25");
+    rerank.remove(Integer.toString(qId));
     }
 
     public double genWeightTerm(double K, double tf_doc, double tf_query, double n, int N) {
@@ -174,7 +179,10 @@ public class QueryConSens{
     }
 
     public double genWeightTermPair(double K, double tf_doc, double tf_query, double n, int N) {
-        return (k1+1)*tf_doc*(k3+1)*tf_query/((K+tf_doc)*(k3+tf_query))*Math.log((N-n+0.5)/(n+0.5));
+        //return (k1+1)*tf_doc*(k3+1)*tf_query/((K+tf_doc)*(k3+tf_query))*Math.log((N-n+0.5)/(n+0.5));
+        double tmp = (k1+1)*tf_doc/(tf_doc+K)*Math.log(1+((N-n+0.5)/(n+0.5))); 
+        //System.out.println(tmp +": tf_doc:"+tf_doc+"K: "+K + "N: "+ N + "n: "+ n);
+        return tmp;
     }
   
   
