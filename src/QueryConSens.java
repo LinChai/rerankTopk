@@ -49,7 +49,7 @@ public class QueryConSens{
         this.k1 = k1;
         this.k3 = k3;
         this.b = b;
-        this.delta = 0.3;
+        this.delta = 0.7;
     } 
     public void genRelevanceScore() {
         String line = null;
@@ -179,10 +179,10 @@ public class QueryConSens{
     }
 
     public double genWeightTermPair(double K, double tf_doc, double tf_query, double n, int N) {
-        //return (k1+1)*tf_doc*(k3+1)*tf_query/((K+tf_doc)*(k3+tf_query))*Math.log((N-n+0.5)/(n+0.5));
-        double tmp = (k1+1)*tf_doc/(tf_doc+K)*Math.log(1+((N-n+0.5)/(n+0.5))); 
+        return (k1+1)*tf_doc*(k3+1)*tf_query/((K+tf_doc)*(k3+tf_query))*Math.log((N-n+0.5)/(n+0.5));
+        //double tmp = (k1+1)*tf_doc/(tf_doc+K)*Math.log(1+((N-n+0.5)/(n+0.5))); 
         //System.out.println(tmp +": tf_doc:"+tf_doc+"K: "+K + "N: "+ N + "n: "+ n);
-        return tmp;
+        //return tmp;
     }
   
   
@@ -192,7 +192,7 @@ public class QueryConSens{
             System.exit(0);
         }
         String fileName = args[0];
-        QueryConSens qcs = new QueryConSens(fileName, 1.2, 8, 0.75);
+        QueryConSens qcs = new QueryConSens(fileName, 1.2, 20, 0.95);
         qcs.genRelevanceScore();
     }
 } 

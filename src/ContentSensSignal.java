@@ -105,10 +105,6 @@ public class ContentSensSignal {
         return x <= delta? 1-x/delta: 0.0;
     }
 
-    public double kernelFunc2(double x) {
-        return 0.0; 
-    }
-
     public double termpairTF_doc(List<Integer> dist) {
         double tf = 0.0;
         for (int i = 0; i < dist.size(); i++) {
@@ -128,14 +124,15 @@ public class ContentSensSignal {
 
     public double termpairTF_query(String t1, String t2) {
         double tf = 0.0;
-        double min_dis = Integer.MAX_VALUE;
-        for(int i = 0; i < postings.get(t1).size(); i++) {
-            for(int j  = 0; j < postings.get(t2).size(); j++) {
-                min_dis = Math.min(Math.abs(postings.get(t1).get(i) - postings.get(t2).get(j)), min_dis);
-            }
-        }
-        //return kernelFunc(0.5)*min_dis;
-        return kernelFunc(0.5*min_dis);
+        double min = Integer.MAX_VALUE;
+        min = Math.min(postings.get(t1).size(), postings.get(t2).size());
+        //for(int i = 0; i < postings.get(t1).size(); i++) {
+        //    for(int j  = 0; j < postings.get(t2).size(); j++) {
+        //        min_dis = Math.min(Math.abs(postings.get(t1).get(i) - postings.get(t2).get(j)), min_dis);
+        //    }
+        //}
+        return kernelFunc(0.5)*min;
+        //return kernelFunc(0.5*min_dis);
     }
 
 
@@ -148,10 +145,19 @@ public class ContentSensSignal {
     }
 
     public double relFunc(List<Integer> coPos) {
+        //def cooccur:
+        //return coPos.size() > 0? 1.0: 0.0;
         double relScore = 0.0;
+        int mindis = Integer.MAX_VALUE;
+        relScore +=  coPos.size() > 0? 1.0: 0.0;
         for(int i = 0; i < coPos.size(); i++) {
+            //def sqrecip:
             relScore += 1.0/(double)(coPos.get(i)*coPos.get(i));
+            //def MinDist:
+            mindis = Math.min(coPos.get(i), mindis);
+            relScore += kernelFunc(0.5*(double)coPos.get(i));
         }
+        //relScore += Math.log1p(1+ Math.exp(-mindis));
         return relScore;
     }
     public void update_PairInfo(ContentSensSignal docContext) {
